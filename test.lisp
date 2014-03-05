@@ -122,3 +122,4 @@
 (my-macro (mac (body)
                (body cont 'fun)))
 
+(my-function 5 6)
