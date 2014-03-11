@@ -27,41 +27,58 @@ toSymbols = (out, char) ->
     @row += 1
   out
 
-joinSymbols = (group, out, symbol) ->
+composeGroup = (out, symbol) ->
+  @state = "FIND FIRST" if not @state?
+  symbolFunction = c(symbol.token)[@group.name]
   out.push(
-    if c(symbol.token).inGroup(group) and not @delim
-      @delim = true
-      symbol.type = group
+    if @state == "FIND FIRST"
+      if symbolFunction?.start
+        @state = "FIND NEXT"
+        symbol.group = @group.name
       symbol
-    else if c(symbol.token).inGroup(group) and @delim
-      @delim = false
-      appendSymbol(out.pop(), symbol.token)
-    else if @delim
-      appendSymbol(out.pop(), symbol.token)
+    else if @state == "FIND NEXT"
+      if symbolFunction?.end
+        @state = "FIND FIRST"
+        if symbolFunction.end.inclusive == "incl"
+          appendSymbol(out.pop(), symbol.token)
+        else if symbolFunction.end.inclusive == "excl"
+          symbol
+        else
+          throw "Internal Error in symbol definition"
+      else
+        appendSymbol(out.pop(), symbol.token)
     else
-      symbol)
+      throw "Compose group @state error. State: #{@state}")
   out
 
-onlyMembers = (group, out, symbol) ->
+onlyMembers = (out, symbol) ->
+  @state = "FIND FIRST" if not @state?
   out.push(
-    if c(symbol.token).inGroup(group) and not @delim
-      @delim = true
-      symbol.type = group
+    if @state == "FIND FIRST"
+      if c(symbol.token).inGroup(@group.name)
+        @state = "FIND NEXT"
+        symbol.group = @group.name
       symbol
-    else if c(symbol.token).inGroup(group) and @delim
-      appendSymbol(out.pop(), symbol.token)
+    else if @state == "FIND NEXT"
+      if not c(symbol.token).inGroup(@group.name)
+        @state = "FIND FIRST"
+        symbol
+      else
+        appendSymbol(out.pop(), symbol.token)
     else
-      @delim = false
-      symbol)
+      throw "Only members @state error. State: #{@state}")
+
   out
 
+#composeStrings = async.apply(composeGroup, c('STRING'))
 
 lex = (input) ->
   _.chain(input)
     .reduce(toSymbols,[],{row:1,col:1})
-    .reduce(async.apply(joinSymbols, 'STRING'), [], {delim:false})
-    .reduce(async.apply(onlyMembers, 'WHITESPACE'), [], {delim:false})
-    #.reduce(async.apply(joinSymbols, 'COMMENT'), [], {delim:false})
+    .reduce(composeGroup, [], group:c("STRING"))
+    .reduce(composeGroup, [], group:c("COMMENT"))
+    .reduce(composeGroup, [], group:c("REGEX"))
+    .reduce(onlyMembers, [], group:c('WHITESPACE'))
     .value()
 
 
@@ -76,4 +93,6 @@ if not module.parent?
     fs.readFile(filename, encoding:'utf8', (err, raw) ->
       k.log("Lexing..")
       lexed = lex(raw)
-      k.inspect(lexed))
+      k.inspect(_(lexed).last(6))
+      k.log("Number of tokens: #{lexed.length}"))
+    #)

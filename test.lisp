@@ -123,3 +123,4 @@
                (body cont 'fun)))
 
 (my-function 5 6)
+(pattern /test/gi)
