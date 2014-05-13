@@ -9,7 +9,8 @@ _.mixin(
       _(token.color("#{token.line}
         \t#{token.index}-#{token.ends}(#{token.value.length})
         \t#{token.type}
-        \t#{token.value}")).log()))
+        \t#{token.value}")).log())
+    tokens)
 
 # Removes any matches that falls within deadSpaces
 rejectOverlaps = (matches, deadSpaces) ->
@@ -19,13 +20,13 @@ rejectOverlaps = (matches, deadSpaces) ->
 
 # The tokenizer
 # Input:
-#   defines: A associative array with keys:
-#     newlinepattern
-#     patterns
 #   text: The text to tokenize
-tokenize = (defines, text) ->
+#   defines: A associative array with keys:
+#     patterns
+tokenize = (text, defines) ->
   # Later on we use this to decorate our tokens with line numbers
-  newLines = _(text).regexpMap(defines.newlinepattern, (match) -> match.index)
+
+  newLines = _(text).regexpMap(/\n/mg, (match) -> match.index)
 
   # We start out with iterating rules
   _.chain(defines.patterns)
@@ -62,21 +63,7 @@ tokenize = (defines, text) ->
 
     # Make sure all tokens appear in the correct order
     .sortBy((token) -> token.index)
+    .value()
 
-# Export tokenize function if file is required
-if require.main != module
-  module.exports = tokenize
+_.mixin(tokenize:tokenize)
 
-# Make a test run if file is run by it self
-else
-  fs      = require("fs")
-  defines = require('./defines')
-  #
-  # Read a sample file
-  fs.readFile("test.lisp", encoding:'utf8', (err, text) ->
-    console.log(chalk.red("Start"))
-
-    tokenize(defines, text).inspectTokens()
-
-    console.log(chalk.red("Done"))
-    )

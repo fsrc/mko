@@ -115,12 +115,18 @@
 
 (my-value 4)
 
-(my-function (-> (arg-a arg-b)
-                 "Description"
-                 (arg-a - arg-b)))
+(my-function (- (arg-a arg-b)
+                "Description"
+                (arg-a - arg-b)))
 
 (my-macro (mac (body)
                (body cont 'fun)))
 
 (pattern /test/gi)
 (my-function 5 6)
+(array-var [a b c d])
+(my-module/array-var {a j
+            b k
+            c l
+            d o})
+(array-var <a b c d>)

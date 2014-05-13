@@ -1,39 +1,54 @@
+_     = require("underscore")
 chalk = require("chalk")
 
-starters = "\\[\\(\\{"
-enders   = "\\]\\)\\}"
-predelimit = "#{starters}\\s:^"
-postdelimit = "#{enders}\\s:;$"
-exports.newlinepattern = /\n/mg
+starters    = ['[','(','{','<']
+enderof     = {'[':']','(':')','{':'}','<':'>'}
+enders      = [']',')','}','>']
+starts      = starters.join('\\')
+ends        = enders.join('\\')
+predelimit  = "\\#{starts}\\s:^"
+postdelimit = "\\#{ends}\\s:;$"
+delimiters  = "/"
 exports.patterns =
   string  :
-    color:chalk.yellow
-    rex:"\".+\""
-    precedents: ['comment', 'regex']
+    color      : chalk.yellow
+    rex        : "\".+\""
+    precedents : ['note', 'regex']
 
   regex   :
-    color:chalk.red
-    rex:"(?!#{predelimit})/.*/[img]{0,3}"
-    precedents: ['comment', 'string']
+    color      : chalk.red
+    rex        : "(?!#{predelimit})/.*/[img]{0,3}"
+    precedents : ['note', 'string']
 
   symbol  :
-    color:chalk.magenta
-    rex:"(?![#{predelimit}])[^#{postdelimit}]+"
-    precedents: ['string','regex','comment']
+    color      : chalk.magenta
+    rex        : "(?![#{predelimit}])[^#{postdelimit}]+"
+    precedents : ['string','regex','note']
 
-  group   :
-    color:chalk.white
-    rex:"[#{starters}#{enders}]"
-    precedents: ['string','symbol','regex','comment']
+  delim   :
+    color      : chalk.white
+    rex        : "[\\#{starts}\\#{ends}\\#{delimiters}]"
+    precedents : ['string','symbol','regex','note']
 
-  comment :
-    color:chalk.green
-    rex:";.*$"
-    precedents: []
+  note :
+    color      : chalk.green
+    rex        : ";.*$"
+    precedents : []
 
   indent  :
-    color:chalk.gray
-    rex:"^\\s+"
-    precedents: []
+    color      : chalk.gray
+    rex        : "^\\s+"
+    precedents : []
 
+exports.delimiters =
+  starters : starters
+  enders   : enders
+  enderof  : enderof
 
+exports.root = () -> _(
+  color  : chalk.gray
+  type   : 'root'
+  value  : ""
+  index  : 0
+  ends   : 0
+  line   : 0).clone()
