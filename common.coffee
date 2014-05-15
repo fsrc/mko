@@ -17,6 +17,26 @@ _.mixin(
     console.error(data)
     data
 
+  inspectTokens : (tokens) ->
+    _(tokens).traverse((t, indent) ->
+      indentstr = _([0...indent]).map(() -> " ").join("")
+      _(t.color("#{t.line}:#{t.column}
+        \t#{t.index}-#{t.ends}(#{t.value.length})
+        \t#{t.type}:#{t.grammar}
+        \t#{indentstr}#{t.value}")).log()
+      t
+    )
+
+  traverse: (tokens, fn) ->
+    inspect = (tokens, level) ->
+      _(tokens).map((token) ->
+        fn(token, level)
+        inspect(token.children, level + 1) if token.children?
+        fn(token.ender, level) if token.ender?)
+
+    inspect(tokens, 0)
+    tokens
+
   inspect : (data, depth) ->
     console.error(util.inspect(data, {colors:true,depth:depth}))
     data
@@ -38,14 +58,6 @@ _.mixin(
     result.push(fn(match)) while match = pat.exec(text)
     result
 
-  lineNr : (lineIndices, position) ->
-    indices = _(lineIndices).clone()
-    indices.unshift(0)
-    indices.sort((a,b) -> a-b)
-    for i in [0...indices.length - 1]
-      if position >= indices[i] and position < indices[i + 1]
-        return i
-    return indices.length - 1
 )
 
 

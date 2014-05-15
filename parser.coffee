@@ -1,22 +1,5 @@
 _ = require("underscore")
 
-inspectTokenTree = (tokens) ->
-  print = (t, indent) ->
-    indentstr = _([0...indent]).map(() -> " ").join("")
-    _(t.color("#{t.line}
-      \t#{t.index}-#{t.ends}(#{t.value.length})
-      \t#{t.type}
-      \t#{indentstr}#{t.value}")).log()
-
-  inspect = (tokens, indent) ->
-    _(tokens).map((token) ->
-      print(token, indent)
-      inspect(token.children, indent + 1) if token.children?
-      print(token.ender, indent) if token.ender?)
-
-  inspect(tokens, 0)
-  tokens
-
 tree = (tokens, root, delimiters) ->
   isstart   = (t) -> _(delimiters.starters).contains(t.value)
   isend     = (t) -> _(delimiters.enders).contains(t.value)
@@ -42,9 +25,19 @@ tree = (tokens, root, delimiters) ->
     , [root()])
 
 
-parse = (tokens, defines) ->
+parse = (tokens, groups) ->
+  _(tokens).traverse((token, level) ->
+    if token.type == "list" and token.children.length > 0
+      token.children = _.chain(token.children)
+        .rest()
+        .map((child) -> _(child).extend(grammar:"expr"))
+        .unshift(_(_(token.children).first()).extend(grammar:"call"))
+        .value()
+    else
+      _(token).extend(grammar:"atom")
+    token
+  )
 
-_.mixin(inspectTokenTree:inspectTokenTree)
 _.mixin(tree:tree)
 _.mixin(parse:parse)
 

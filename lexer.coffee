@@ -1,31 +1,32 @@
 _      = require('underscore')
 chalk  = require("chalk")
-
 common = require('./common')
 
 _.mixin(
-  inspectTokens: (tokens) ->
-    _(tokens).map((token) ->
-      _(token.color("#{token.line}
-        \t#{token.index}-#{token.ends}(#{token.value.length})
-        \t#{token.type}
-        \t#{token.value}")).log())
-    tokens)
-
-# Removes any matches that falls within deadSpaces
-rejectOverlaps = (matches, deadSpaces) ->
-  _(matches).filter((match) ->
-    not _(deadSpaces).some((space) ->
-      match.index >= space.index and match.index < space.ends))
-
+  coordinate : (lineIndices, position) ->
+    indices = _(lineIndices).clone()
+    indices.unshift(0)
+    indices.sort((a,b) -> a-b)
+    for line in [0...indices.length - 1]
+      if position >= indices[line] and position < indices[line + 1]
+        column = position - indices[line]
+        return { line:line + 1, column:column }
+    return { line: "unknown", column: "unknown"}
+)
 # The tokenizer
 # Input:
 #   text: The text to tokenize
 #   defines: A associative array with keys:
 #     patterns
 tokenize = (text, defines) ->
-  # Later on we use this to decorate our tokens with line numbers
 
+  # Removes any matches that falls within deadSpaces
+  rejectOverlaps = (matches, deadSpaces) ->
+    _(matches).filter((match) ->
+      not _(deadSpaces).some((space) ->
+        match.index >= space.index and match.index < space.ends))
+
+  # Later on we use this to decorate our tokens with line numbers
   newLines = _(text).regexpMap(/\n/mg, (match) -> match.index)
 
   # We start out with iterating rules
@@ -36,6 +37,8 @@ tokenize = (text, defines) ->
       _(text).regexpMap(new RegExp(pat.rex, "mg"), (match) ->
         value = match.shift()
         index = match.index
+        subtype = pat.subtype(value) if pat.subtype?
+
         color : pat.color
         type  : type
         value : value
@@ -58,8 +61,15 @@ tokenize = (text, defines) ->
     # Out comes arrays of arrays, so we flatten them
     .flatten()
 
-    # Decorate tokens with line numbers
-    .map((token) -> _(token).extend(line:_(newLines).lineNr(token.index) + 1))
+    # Apply subtypes
+    .map((token) ->
+      if defines.patterns[token.type].subtype?
+        token.type =
+          defines.patterns[token.type].subtype(token.value)
+      token)
+
+    # Decorate tokens with line numbers and columns
+    .map((token) -> _(token).extend(_(newLines).coordinate(token.index)))
 
     # Make sure all tokens appear in the correct order
     .sortBy((token) -> token.index)
