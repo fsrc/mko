@@ -11,29 +11,20 @@ postdelimit = "\\#{ends}\\s:;$"
 delimiters  = "/"
 exports.patterns =
   string :
-    color      : chalk.yellow
     rex        : "\".+\""
     precedents : ['note', 'regex']
 
   regex :
-    color      : chalk.red
     rex        : "(?!#{predelimit})/.*/[img]{0,3}"
     precedents : ['note', 'string']
 
-  symbol :
-    color      : chalk.magenta
+  atom :
     rex        : "(?![#{predelimit}])[^#{postdelimit}]+"
     precedents : ['string','regex','note']
-    subtype    : (value) ->
-      if not isNaN(value)
-        "number"
-      else
-        "symbol"
 
   delim :
-    color      : chalk.white
     rex        : "[\\#{starts}\\#{ends}\\#{delimiters}]"
-    precedents : ['string','symbol','regex','note']
+    precedents : ['string','atom','regex','note']
     subtype    : (value) ->
       types =
         '(' : 'list'
@@ -46,12 +37,10 @@ exports.patterns =
         "delim"
 
   note :
-    color      : chalk.green
     rex        : ";.*$"
     precedents : []
 
   indent :
-    color      : chalk.gray
     rex        : "^\\s+"
     precedents : []
 
@@ -61,10 +50,13 @@ exports.delimiters =
   enderof  : enderof
 
 exports.root = () -> _(
-  color  : chalk.gray
   type   : 'root'
   value  : ""
   index  : 0
   ends   : 0
-  line   : 0).clone()
+  line   : 0
+  column : 0).clone()
+
+exports.grammar = (t) ->
+
 

@@ -71,6 +71,8 @@ tokenize = (text, defines) ->
     # Decorate tokens with line numbers and columns
     .map((token) -> _(token).extend(_(newLines).coordinate(token.index)))
 
+    .filter((token) ->
+      token.type != "indent" and token.type != "note")
     # Make sure all tokens appear in the correct order
     .sortBy((token) -> token.index)
     .value()

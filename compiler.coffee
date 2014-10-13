@@ -14,12 +14,16 @@ else
   fs.readFile("test.lisp", encoding:'utf8', (err, text) ->
 
     console.log(chalk.red("Start"))
+    console.log(text)
 
     _.chain(text)
       .tokenize(defines)
-      .tree(defines.root, defines.delimiters)
-      .parse(defines.groups)
       .inspectTokens()
+      .tree(defines.root, defines.delimiters)
+      .inspectTokens()
+      .parse(defines.grammar)
+      .inspectTokens()
+      .validate()
 
     console.log(chalk.red("Done")))
 

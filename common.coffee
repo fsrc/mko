@@ -3,8 +3,23 @@ util  = require("util")
 chalk = require("chalk")
 chalk.enabled = true
 
-_.mixin(
+colorfor = (t) ->
+  if (t.type == 'delim' and t.grammar == 'end') or (t.type == 'list' and t.grammar == 'start')
+    chalk.gray
+  else if (t.type == 'atom' and t.grammar == 'call')
+    chalk.green
+  else if (t.type == 'atom' and t.grammar == 'value')
+    chalk.blue
+  else
+    chalk.white
 
+showable = (t) ->
+  if (t.type == 'delim' and t.grammar == 'end') or (t.type == 'list' and t.grammar == 'start')
+    true
+  else
+    true
+
+_.mixin(
   assertnull : (obj, msg, fn) ->
     if not obj? then throw msg
     obj
@@ -18,12 +33,15 @@ _.mixin(
     data
 
   inspectTokens : (tokens) ->
+    _("l:c\tlen\ttype:subtype\tvalue").log()
     _(tokens).traverse((t, indent) ->
-      indentstr = _([0...indent]).map(() -> " ").join("")
-      _(t.color("#{t.line}:#{t.column}
-        \t#{t.index}-#{t.ends}(#{t.value.length})
-        \t#{t.type}:#{t.grammar}
-        \t#{indentstr}#{t.value}")).log()
+      indentstr = _([0...indent-1]).map(() -> "  ").join("")
+      if showable(t)
+        _(colorfor(t)("#{t.line}:#{t.column}
+          \t#{t.value.length}
+          \t#{t.type ? 'ndef'}:#{t.grammar}
+          \t#{indentstr}#{t.value}
+          \t#{if t.error? then chalk.red('ERROR: ' + t.error) else ''}")).log()
       t
     )
 
@@ -58,6 +76,14 @@ _.mixin(
     result.push(fn(match)) while match = pat.exec(text)
     result
 
-)
+  matrix: (array, width) ->
+    _(array).reduce((result, item) ->
+      last = _(result).last()
+      if last.length == width
+        last = []
+        result.push(last)
+      last.push(item)
+      result
+    ,[[]]))
 
 
