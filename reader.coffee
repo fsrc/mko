@@ -25,8 +25,8 @@ camelCase = (str) ->
 endsWith = (str, suffix) ->
   str.indexOf(suffix, str.length - suffix.length) != -1
 
-test = (type, char) ->
-  type.contains(char.char)
+test = (type, atom) ->
+  type.contains(atom.char)
 
 promise = (events) ->
   _.reduce(events, (acc, event) ->
@@ -46,85 +46,161 @@ exports.file = file = (fname) ->
 
 charReader = (strm) ->
   do (strm) ->
-    p = promise(['char', 'error', 'end'])
+    p = promise(['atom', 'error', 'end'])
     strm.on('error', (error) -> p.error(error))
     strm.on('end', () -> p.end())
     strm.on('close', () -> console.log("stream closed"))
     strm.on('data', (data) ->
       _.reduce(data, (acc, char) ->
-        p.char(
-          char:char
+        atom =
           row:acc.row
-          col:acc.col)
-        if test(linefeed,char)
+          col:acc.col
+          char:char
+        if test(linefeed, atom)
+          p.atom(_.assign(type:'lbr', atom))
           acc.row += 1
-          acc.col = 0
+          acc.col = 1
         else
+          p.atom(atom)
           acc.col += 1
         acc
-      , {row:0, col:0}))
+      , {row:1, col:1}))
     p
 
 stringMerger = (strm) ->
   do (strm) ->
-    p = promise(['token', 'error', 'end'])
+    p = promise(['atom', 'error', 'end'])
     strm.onError((error) -> p.error(error))
     strm.onEnd(() -> p.end())
     state = null
 
-    strm.onChar((char) ->
-      if test(quotes, char)
+    strm.onAtom((atom) ->
+      if test(quotes, atom)
         if not state?
-          state = {char:[char]}
-        else if test(esc, _.last(state.char))
-          state.char.push(char)
+          state = {atom:[atom]}
+        else if test(esc, _.last(state.atom))
+          state.atom.push(atom)
         else
-          state.char.push(char)
-          p.token(
-            char:_.pluck(state.char, 'char').join('')
-            type:'string'
-            row:state.char[0].row
-            col:state.char[0].col)
+          state.atom.push(atom)
+          p.atom(
+            type:'str'
+            row:state.atom[0].row
+            col:state.atom[0].col
+            char:_.pluck(state.atom, 'char').join(''))
           state = null
 
       else if state?
-        state.char.push(char)
+        state.atom.push(atom)
 
       else
-        p.token(char))
+        p.atom(atom))
     p
 
 commentMerger = (strm) ->
   do (strm) ->
-    p = promise(['token', 'error', 'end'])
+    p = promise(['atom', 'error', 'end'])
     strm.onError((error) -> p.error(error))
     strm.onEnd(() -> p.end())
     state = null
 
-    strm.onChar((char) ->
-      if test(comment, char)
-        state = [char]
+    strm.onAtom((atom) ->
+      if state?
+        if test(linefeed, atom)
+          p.atom(
+            type:'com'
+            row:state.atom[0].row
+            col:state.atom[0].col
+            char:_.pluck(state.atom, 'char').join(''))
+          state = null
+        else
+          state.atom.push(atom)
+      else if test(comment, atom)
+        state = {atom:[atom]}
       else
-        p.token(char))
+        p.atom(atom))
+    p
+
+spaceMerger = (strm) ->
+  do (strm) ->
+    p = promise(['atom', 'error', 'end'])
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
+    state = null
+
+    strm.onAtom((atom) ->
+      if state?
+        if not test(space, atom)
+          p.atom(
+            type:'spa'
+            row:state.atom[0].row
+            col:state.atom[0].col
+            char:_.pluck(state.atom, 'char').join(''))
+          p.atom(atom)
+          state = null
+        else
+          state.atom.push(atom)
+
+      else if test(space, atom)
+        state = {atom:[atom]}
+
+      else
+        p.atom(atom))
+    p
+
+classifyDelimiters = (strm) ->
+  do (strm) ->
+    p = promise(['atom', 'error', 'end'])
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
+
+    strm.onAtom((atom) ->
+      if test(delimiters, atom)
+        p.atom(
+          type:'del'
+          row:atom.row
+          col:atom.col
+          char:atom.char)
+      else
+        p.atom(atom))
     p
 
 symbolMerger = (strm) ->
   do (strm) ->
-    p = promise(['token', 'error', 'end'])
+    p = promise(['atom', 'error', 'end'])
     strm.onError((error) -> p.error(error))
     strm.onEnd(() -> p.end())
     state = null
 
-    strm.onChar((char) ->
-        p.token(char))
+    strm.onAtom((atom) ->
+      if atom.type?
+        if state?
+          p.atom(
+            type:'sym'
+            row:state.atom[0].row
+            col:state.atom[0].col
+            char:_.pluck(state.atom, 'char').join(''))
+          state = null
+        p.atom(atom)
+      else
+        if state?
+          state.atom.push(atom)
+        else
+          state = {atom:[atom]})
     p
 
 if module.parent == null
   infile = process.argv[2]
   console.log "Input file: #{infile}"
 
-  stringMerger(charReader(file(infile)))
-    .onToken((token) -> console.log(token))
+  _.compose(
+    symbolMerger
+    classifyDelimiters
+    spaceMerger
+    commentMerger
+    stringMerger
+    charReader
+    file)(infile)
+    .onAtom((atom) -> console.log(atom))
     .onError((error) -> console.log(error))
     .onEnd(() -> console.log("Done"))
 
