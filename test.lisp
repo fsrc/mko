@@ -7,5 +7,5 @@
             (+ a b)))
 
 ; We could have a comment
-(def b <5 b "lala">)
+(def b <5 b "lal\"a">)
 

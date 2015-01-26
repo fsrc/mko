@@ -1,94 +1,42 @@
 _ = require("lodash")
 fs = require('fs')
 
-delimiters = _(['(',')','[',']','{','}',';','"',"<",">"])
-space      = _([' ','\t'])
-linefeed   = _(['\n'])
+delimiters  = _(['(',')','[',']','{','}',"<",">"])
+space       = _([' ','\t'])
+linefeed    = _(['\n'])
+starters    = _(['(','[','{',"<"])
+enders      = _([')',']','}',">"])
+quotes      = _(['"', "'"])
+esc         = _(['\\'])
+comment     = _([';'])
+pairs =
+  "(" : ")"
+  "[" : "]"
+  "{" : "}"
+  "<" : ">"
+  "'" : "'"
+  ";" : "\n"
+  '"' : '"'
 
-exports.reader = reader = (strm) ->
-  do (strm) ->
-    state = {row:0,col:-1,be:0,tok:""}
-    handleToken = () ->
-    handleError = () ->
-    handleEnd = () ->
-    prom =
-      onToken:(handler) ->
-        handleToken = handler
-        prom
-      onError:(handler) ->
-        handleError = handler
-        prom
-      onEnd:(handler) ->
-        handleEnd = handler
-        prom
+camelCase = (str) ->
+  str.replace(/(?:_| |\b)(\w)/g, (str, p1) ->
+      p1.toUpperCase())
 
-    strm.on('error', (error) -> handleError(error))
-    strm.on('data', (data) ->
-      foldl = (acc, char) ->
-        acc.col += 1
-        # Found delimiter
-        if delimiters.contains(char)
-          # Handle any accumulated token
-          if acc.tok != ""
-            acc.en = acc.st
-            handleToken(row:acc.row, st:acc.st, tok:acc.tok)
-            acc.tok = ""
-          # Handle delimiter token
-          handleToken(row:acc.row, st:acc.col, tok:char)
+endsWith = (str, suffix) ->
+  str.indexOf(suffix, str.length - suffix.length) != -1
 
-        # Found space token
-        else if space.contains(char)
-          # If we don't have an acumulated token, start a space token
-          if acc.tok == ""
-            acc.st = acc.col
-            acc.tok = char
-          # If we have an space token, continue the token
-          else if space.contains(acc.tok[0])
-            acc.tok += char
-          # If we have another accumulated token
-          else if acc.tok != ""
-            handleToken(row:acc.row, st:acc.st, tok:acc.tok)
-            acc.tok = char
-          # In all other cases
-          else
-            console.log "WARNING strange hase in space token"
-            handleToken(acc)
-            acc.tok = ""
+test = (type, char) ->
+  type.contains(char.char)
 
-        # If we have linefeed
-        else if linefeed.contains(char)
-          # If we have accumulation going on
-          if acc.tok != ""
-            handleToken(row:acc.row, st:acc.st, tok:acc.tok)
-            acc.tok = ""
-
-          # Take care of the linefeed
-          handleToken(row:acc.row, st:acc.col, tok:char)
-          acc.row += 1
-          acc.col = -1
-
-        # Any other character would end up accumulating here
-        else
-          # Start a new accumulation
-          if acc.tok == ""
-            acc.st = acc.col
-            acc.tok = char
-          # If we have a space accumulation going on, end it
-          else if space.contains(acc.tok[0])
-            handleToken(row:acc.row, st:acc.st, tok:acc.tok)
-            acc.tok = char
-          # Else continue accumulate
-          else
-            acc.tok += char
-
-        # Finally pass on state to next roundtrip
-        acc
-
-      state = _.reduce(data, foldl, state))
-    strm.on('end', () -> handleEnd())
-    strm.on('close', () -> console.log("stream closed"))
-
-    prom
+promise = (events) ->
+  _.reduce(events, (acc, event) ->
+    name = camelCase(event)
+    acc[event] = () ->
+    acc["on#{name}"] = (handler) ->
+      acc[event] = handler
+      acc
+    acc
+  , { events: events })
 
 exports.file = file = (fname) ->
   strm = fs.createReadStream(fname,
@@ -96,12 +44,87 @@ exports.file = file = (fname) ->
     encoding:'utf8'
     autoClose:true)
 
+charReader = (strm) ->
+  do (strm) ->
+    p = promise(['char', 'error', 'end'])
+    strm.on('error', (error) -> p.error(error))
+    strm.on('end', () -> p.end())
+    strm.on('close', () -> console.log("stream closed"))
+    strm.on('data', (data) ->
+      _.reduce(data, (acc, char) ->
+        p.char(
+          char:char
+          row:acc.row
+          col:acc.col)
+        if test(linefeed,char)
+          acc.row += 1
+          acc.col = 0
+        else
+          acc.col += 1
+        acc
+      , {row:0, col:0}))
+    p
+
+stringMerger = (strm) ->
+  do (strm) ->
+    p = promise(['token', 'error', 'end'])
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
+    state = null
+
+    strm.onChar((char) ->
+      if test(quotes, char)
+        if not state?
+          state = {char:[char]}
+        else if test(esc, _.last(state.char))
+          state.char.push(char)
+        else
+          state.char.push(char)
+          p.token(
+            char:_.pluck(state.char, 'char').join('')
+            type:'string'
+            row:state.char[0].row
+            col:state.char[0].col)
+          state = null
+
+      else if state?
+        state.char.push(char)
+
+      else
+        p.token(char))
+    p
+
+commentMerger = (strm) ->
+  do (strm) ->
+    p = promise(['token', 'error', 'end'])
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
+    state = null
+
+    strm.onChar((char) ->
+      if test(comment, char)
+        state = [char]
+      else
+        p.token(char))
+    p
+
+symbolMerger = (strm) ->
+  do (strm) ->
+    p = promise(['token', 'error', 'end'])
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
+    state = null
+
+    strm.onChar((char) ->
+        p.token(char))
+    p
 
 if module.parent == null
   infile = process.argv[2]
   console.log "Input file: #{infile}"
 
-  reader(file(infile))
+  stringMerger(charReader(file(infile)))
     .onToken((token) -> console.log(token))
     .onError((error) -> console.log(error))
     .onEnd(() -> console.log("Done"))
+
