@@ -38,6 +38,8 @@ exports.delimiter = delimiter = (strm) ->
     state = {row:0,col:-1,be:0,tok:""}
     p = promise(['delimiter', 'error', 'end'])
     strm.on('error', (error) -> p.error(error))
+    strm.on('end', () -> p.end())
+    strm.on('close', () -> console.log("stream closed"))
     strm.on('data', (data) ->
       foldl = (acc, char) ->
         acc.col += 1
@@ -100,8 +102,6 @@ exports.delimiter = delimiter = (strm) ->
         acc
 
       state = _.reduce(data, foldl, state))
-    strm.on('end', () -> p.end())
-    strm.on('close', () -> console.log("stream closed"))
     p
 
 parser = () ->
