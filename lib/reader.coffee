@@ -27,6 +27,40 @@ rules =
     ";" : "\n"
     '"' : '"'
 
+primitives = _ [
+  "def"    # Generic
+  "int"    # Integer
+  "str"    # String
+  "char"   # Character
+  "date"   # Date
+  "num"    # Float
+  "bool"   # Boolean
+
+  "list"
+  "object"
+  "tuple"
+  "array"
+
+  "quote"
+  "fun"    # Function
+  "mac"    # Macro
+
+  "either" # Execute either fun A or B
+
+  "and"    # Boolean and
+  "or"     # Boolean or
+  "not"    # Boolean not
+  "xor"    # Boolean xor
+
+  "rec"    # Recursion of anonymous func
+  "use"    # Reference another module
+
+  "add"
+  "sub"
+  "div"
+  "mul"
+]
+
 module.exports = _.compose(
   _.partial(nest, rules)
   _.partial(strip, rules)
