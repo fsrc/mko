@@ -1,4 +1,4 @@
-_ = require('lodash')
+_       = require('lodash')
 promise = require('../promise')
 
 module.exports = (rules, strm) ->

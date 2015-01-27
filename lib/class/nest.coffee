@@ -1,6 +1,6 @@
-_ = require("lodash")
+_       = require("lodash")
 promise = require('../promise')
-test = require('../helpers').test
+test    = require('../helpers').test
 
 indent = (amount, text) ->
   space = _([0..amount]).map((i) -> "  ").join('')

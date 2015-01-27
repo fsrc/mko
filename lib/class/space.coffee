@@ -1,6 +1,6 @@
-_ = require("lodash")
+_       = require("lodash")
 promise = require('../promise')
-test = require('../helpers').test
+test    = require('../helpers').test
 
 module.exports = (rules, strm) ->
   do (rules, strm) ->
