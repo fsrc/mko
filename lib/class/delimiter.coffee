@@ -11,10 +11,10 @@ module.exports = (rules, strm) ->
     strm.onAtom((atom) ->
       if test(rules.delimiters, atom)
         p.atom(
-          type:'del'
-          row:atom.row
-          col:atom.col
-          char:atom.char)
+          t:'de'
+          r:atom.r
+          c:atom.c
+          ch:atom.ch)
       else
         p.atom(atom))
     p

@@ -9,13 +9,13 @@ module.exports = (rules, strm) ->
     state = null
 
     strm.onAtom((atom) ->
-      if atom.type?
+      if atom.t?
         if state?
           p.atom(
-            type:'sym'
-            row:state.atom[0].row
-            col:state.atom[0].col
-            char:_.pluck(state.atom, 'char').join(''))
+            t:'sy'
+            r:state.atom[0].r
+            c:state.atom[0].c
+            ch:_.pluck(state.atom, 'ch').join(''))
           state = null
         p.atom(atom)
       else

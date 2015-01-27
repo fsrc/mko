@@ -1,8 +1,34 @@
 _ = require("lodash")
 
-exports.char      = require("./class/char")
-exports.string    = require("./class/string")
-exports.comment   = require("./class/comment")
-exports.space     = require("./class/space")
-exports.delimiter = require("./class/delimiter")
-exports.symbol    = require("./class/symbol")
+char      = require("./class/char")
+string    = require("./class/string")
+comment   = require("./class/comment")
+space     = require("./class/space")
+delimiter = require("./class/delimiter")
+symbol    = require("./class/symbol")
+
+rules =
+  delimiters  : _(['(',')','[',']','{','}',"<",">"])
+  space       : _([' ','\t'])
+  linefeed    : _(['\n'])
+  starters    : _(['(','[','{',"<"])
+  enders      : _([')',']','}',">"])
+  quotes      : _(['"', "'"])
+  esc         : _(['\\'])
+  comment     : _([';'])
+  pairs :
+    "(" : ")"
+    "[" : "]"
+    "{" : "}"
+    "<" : ">"
+    "'" : "'"
+    ";" : "\n"
+    '"' : '"'
+
+module.exports = _.compose(
+  _.partial(symbol, rules)
+  _.partial(delimiter, rules)
+  _.partial(space, rules)
+  _.partial(comment, rules)
+  _.partial(string, rules)
+  _.partial(char, rules))

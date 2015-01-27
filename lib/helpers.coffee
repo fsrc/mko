@@ -6,5 +6,5 @@ exports.endsWith = (str, suffix) ->
   str.indexOf(suffix, str.length - suffix.length) != -1
 
 exports.test = (type, atom) ->
-  type.contains(atom.char)
+  type.contains(atom.ch)
 

@@ -11,16 +11,16 @@ module.exports = (rules, strm) ->
     strm.on('data', (data) ->
       _.reduce(data, (acc, char) ->
         atom =
-          row:acc.row
-          col:acc.col
-          char:char
+          r:acc.r
+          c:acc.c
+          ch:char
         if test(rules.linefeed, atom)
-          p.atom(_.assign(type:'lbr', atom))
-          acc.row += 1
-          acc.col = 1
+          p.atom(_.assign(t:'lb', atom))
+          acc.r += 1
+          acc.c = 1
         else
           p.atom(atom)
-          acc.col += 1
+          acc.c += 1
         acc
-      , {row:1, col:1}))
+      , {r:1, c:1}))
     p

@@ -18,10 +18,10 @@ module.exports = (rules, strm) ->
         else
           state.atom.push(atom)
           p.atom(
-            type:'str'
-            row:state.atom[0].row
-            col:state.atom[0].col
-            char:_.pluck(state.atom, 'char').join(''))
+            t:'st'
+            r:state.atom[0].r
+            c:state.atom[0].c
+            ch:_.pluck(state.atom, 'ch').join(''))
           state = null
 
       else if state?

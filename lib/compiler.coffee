@@ -20,15 +20,7 @@ rules =
     '"' : '"'
 
 module.exports = (stream) ->
-  _.compose(
-    _.partial(reader.symbol, rules)
-    _.partial(reader.delimiter, rules)
-    _.partial(reader.space, rules)
-    _.partial(reader.comment, rules)
-    _.partial(reader.string, rules)
-    _.partial(reader.char, rules)
-    )(stream)
-
+  reader(stream)
     .onAtom((atom) -> console.log(atom))
     .onError((error) -> console.log(error))
     .onEnd(() -> console.log("Done"))

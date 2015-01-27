@@ -13,10 +13,10 @@ module.exports = (rules, strm) ->
       if state?
         if test(rules.linefeed, atom)
           p.atom(
-            type:'com'
-            row:state.atom[0].row
-            col:state.atom[0].col
-            char:_.pluck(state.atom, 'char').join(''))
+            t:'co'
+            r:state.atom[0].r
+            c:state.atom[0].c
+            ch:_.pluck(state.atom, 'ch').join(''))
           state = null
         else
           state.atom.push(atom)

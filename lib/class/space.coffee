@@ -13,10 +13,10 @@ module.exports = (rules, strm) ->
       if state?
         if not test(rules.space, atom)
           p.atom(
-            type:'spa'
-            row:state.atom[0].row
-            col:state.atom[0].col
-            char:_.pluck(state.atom, 'char').join(''))
+            t:'sp'
+            r:state.atom[0].r
+            c:state.atom[0].c
+            ch:_.pluck(state.atom, 'ch').join(''))
           p.atom(atom)
           state = null
         else
