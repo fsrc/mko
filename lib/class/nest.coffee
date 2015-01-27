@@ -1,4 +1,4 @@
-_ = require('lodash')
+_ = require("lodash")
 promise = require('../promise')
 test = require('../helpers').test
 
@@ -7,12 +7,13 @@ module.exports = (rules, strm) ->
     p = promise(['atom', 'error', 'end'])
     strm.onError((error) -> p.error(error))
     strm.onEnd(() -> p.end())
-    state = null
+    state = _([])
 
     strm.onAtom((atom) ->
-      if test(rules.linefeed, atom) or
-        test(rules.space, atom) or
-        test(rules.comment, atom)
-      else
-        p.atom(atom))
+      if test(rules.starters, atom)
+        state.push(_(atom).assign(child:[]))
+      else if test(rules.enders, atom)
+        p.atom(state.pop())
+      else if state.length > 0
+        state.last().child.push(atom))
     p
