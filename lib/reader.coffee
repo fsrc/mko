@@ -6,6 +6,7 @@ comment   = require("./class/comment")
 space     = require("./class/space")
 delimiter = require("./class/delimiter")
 symbol    = require("./class/symbol")
+strip     = require("./class/strip")
 
 rules =
   delimiters  : _(['(',')','[',']','{','}',"<",">"])
@@ -26,6 +27,7 @@ rules =
     '"' : '"'
 
 module.exports = _.compose(
+  _.partial(strip, rules)
   _.partial(symbol, rules)
   _.partial(delimiter, rules)
   _.partial(space, rules)
