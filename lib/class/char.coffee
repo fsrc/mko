@@ -4,12 +4,15 @@ test    = require('../helpers').test
 
 module.exports = (rules, strm) ->
   do (rules, strm) ->
+    state = {r:1, c:1}
     p = promise(['atom', 'error', 'end'])
     strm.on('error', (error) -> p.error(error))
-    strm.on('end', () -> p.end())
-    strm.on('close', () -> console.log("stream closed"))
+    strm.on('end', () ->
+      p.atom(t:'eof', r:state.r, c:state.c, ch:"\0")
+      p.end())
+    strm.on('close', () -> )
     strm.on('data', (data) ->
-      _.reduce(data, (acc, char) ->
+      state = _.reduce(data, (acc, char) ->
         atom =
           r:acc.r
           c:acc.c
@@ -22,5 +25,5 @@ module.exports = (rules, strm) ->
           p.atom(atom)
           acc.c += 1
         acc
-      , {r:1, c:1}))
+      , state))
     p

@@ -1,5 +1,7 @@
 _      = require('lodash')
 reader = require('./reader')
+evaluate = require('./evaluator')
+errors = require('./errors')
 
 rules =
   delimiters  : _(['(',')','[',']','{','}',"<",">"])
@@ -21,6 +23,9 @@ rules =
 
 module.exports = (stream) ->
   reader(stream)
-    .onAtom((atom) -> console.log(atom))
-    .onError((error) -> console.log(error))
+    .onAtom((form) -> console.log("Evaluated:\n", evaluate(form)))
+    .onError((code, args...) ->
+      console.log("reader error:", errors(code, args...))
+      process.exit(code))
     .onEnd(() -> console.log("Done"))
+
