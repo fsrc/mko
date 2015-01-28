@@ -10,14 +10,14 @@ strip     = require("./class/strip")
 nest      = require("./class/nest")
 
 rules =
-  delimiters  : _(['(',')','[',']','{','}',"<",">"])
-  space       : _([' ','\t'])
-  linefeed    : _(['\n'])
-  starters    : _(['(','[','{',"<"])
-  enders      : _([')',']','}',">"])
-  quotes      : _(['"', "'"])
-  esc         : _(['\\'])
-  comment     : _([';'])
+  delimiters  : _ ['(',')','[',']','{','}',"<",">"]
+  space       : _ [' ','\t']
+  linefeed    : _ ['\n']
+  starters    : _ ['(','[','{',"<"]
+  enders      : _ [')',']','}',">"]
+  quotes      : _ ['"', "'"]
+  esc         : _ ['\\']
+  comment     : _ [';']
   pairs :
     "(" : ")"
     "[" : "]"
@@ -28,6 +28,7 @@ rules =
     '"' : '"'
 
 primitives = _ [
+
   "def"    # Generic
   "int"    # Integer
   "str"    # String
@@ -36,12 +37,12 @@ primitives = _ [
   "num"    # Float
   "bool"   # Boolean
 
-  "list"
-  "object"
-  "tuple"
-  "array"
+  "list"   # Linked list of items
+  "array"  # Array of items
+  "object" # Hashmap
+  "tuple"  # Tuple
 
-  "quote"
+  "quote"  # For quoting lists that should not be evaluated
   "fun"    # Function
   "mac"    # Macro
 
@@ -55,10 +56,15 @@ primitives = _ [
   "rec"    # Recursion of anonymous func
   "use"    # Reference another module
 
-  "add"
-  "sub"
-  "div"
-  "mul"
+  "add"    # Addition
+  "sub"    # Subtraction
+  "div"    # Division
+  "mul"    # Multiplication
+
+  "stdout" # Standard output
+  "errout" # Error output
+  "stdin"  # Standard input
+
 ]
 
 module.exports = _.compose(
@@ -70,3 +76,4 @@ module.exports = _.compose(
   _.partial(comment, rules)
   _.partial(string, rules)
   _.partial(char, rules))
+
