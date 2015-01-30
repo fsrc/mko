@@ -1,4 +1,5 @@
 _ = require("lodash")
+rules = require("./rules")
 
 char      = require("./class/char")
 string    = require("./class/string")
@@ -8,32 +9,6 @@ delimiter = require("./class/delimiter")
 symbol    = require("./class/symbol")
 strip     = require("./class/strip")
 nest      = require("./class/nest")
-
-
-rules =
-  delimiters  : _ ['(',')','[',']','{','}',"<",">"]
-  space       : _ [' ','\t']
-  linefeed    : _ ['\n']
-  eof         : _ ['\0']
-  starters    : _ ['(','[','{',"<"]
-  enders      : _ [')',']','}',">"]
-  quotes      : _ ['"', "'"]
-  esc         : _ ['\\']
-  comment     : _ [';']
-  pairs :
-    "(" : ")"
-    "[" : "]"
-    "{" : "}"
-    "<" : ">"
-    "'" : "'"
-    ";" : "\n"
-    '"' : '"'
-  types :
-    "(" : "list"
-    "[" : "array"
-    "{" : "object"
-    "<" : "tuple"
-
 
 module.exports = _.compose(
   _.partial(nest, rules)

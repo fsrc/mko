@@ -26,7 +26,6 @@ module.exports = (rules, strm) ->
         if not asc? or not rules.pairs[asc.ch] == atom.ch
           return p.error(100, asc.r, asc.c, atom.r, atom.c) if asc?
           return p.error(101, atom.r, atom.c) if not asc?
-        #asc.des.push(atom)
         if stack.length == 0
           p.atom(asc)
       else

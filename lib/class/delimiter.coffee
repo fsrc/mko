@@ -12,7 +12,6 @@ module.exports = (rules, strm) ->
       if test(rules.delimiters, atom)
         p.atom(
           t:'de'
-          f:rules.types[atom.ch]
           r:atom.r
           c:atom.c
           ch:atom.ch)
