@@ -1,5 +1,7 @@
 _ = require("lodash")
 rules = require("./rules")
+primitives = require("./primitives")(rules)
+
 
 char      = require("./class/char")
 string    = require("./class/string")
@@ -13,6 +15,7 @@ nest      = require("./class/nest")
 module.exports = _.compose(
   _.partial(nest, rules)
   _.partial(strip, rules)
+  primitives...
   _.partial(symbol, rules)
   _.partial(delimiter, rules)
   _.partial(space, rules)

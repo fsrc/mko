@@ -1,3 +1,5 @@
+_ = require("lodash")
+
 primitives = [
 
   "def"    # Generic
@@ -35,8 +37,9 @@ primitives = [
   "stdout" # Standard output
   "errout" # Error output
   "stdin"  # Standard input
-
 ]
 
-for p in primitives
-  exports[p] = require("./#{p}")
+module.exports = (rules) ->
+  _(primitives).map((p) ->
+    p = require("./#{p}")
+    _.partial(p, rules)).value()

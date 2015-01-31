@@ -1,7 +1,11 @@
 _       = require('lodash')
 promise = require('../promise')
 
-evaluator = () ->
+evaluator = (form) ->
+  items = _(form.des)
+  items.first().eval(
+    items.rest().map((item) ->
+      item.eval(item)).value())
 
 module.exports = (rules, strm) ->
   do (rules, strm) ->
@@ -11,9 +15,8 @@ module.exports = (rules, strm) ->
     state = null
 
     strm.onAtom((atom) ->
-      if atom.t == 'sy' and atom.ch == 'list'
+      if atom.t == 'de' and atom.ch == '('
         atom.eval = evaluator
-        console.log atom
       p.atom(atom)
     )
     p

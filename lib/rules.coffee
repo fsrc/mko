@@ -1,4 +1,5 @@
 _ = require("lodash")
+primitives = require('./primitives')
 
 module.exports =
   delimiters  : _ ['(',')','[',']','{','}',"<",">"]
@@ -24,3 +25,5 @@ module.exports =
     "[" : "array"
     "{" : "object"
     "<" : "tuple"
+
+  primitives : primitives

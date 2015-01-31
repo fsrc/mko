@@ -14,6 +14,5 @@ module.exports = (rules, strm) ->
       if atom.t == 'sy' and atom.ch == 'errout'
         atom.eval = evaluator
         console.log atom
-      p.atom(atom)
-    )
+      p.atom(atom))
     p

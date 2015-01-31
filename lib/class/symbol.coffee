@@ -1,6 +1,20 @@
 _       = require('lodash')
 promise = require('../promise')
 
+symbol = (form) ->
+  intTest = /\d+/
+  floatTest = /\d+\.\d+/
+
+  if intTest.test(form.ch)
+    dt:"int"
+    val:parseInt(form.ch)
+  else if floatTest.test(form.ch)
+    dt:"float"
+    val:parseFloat(form.ch)
+  else
+    dt:"var"
+    val:form.ch
+
 module.exports = (rules, strm) ->
   do (rules, strm) ->
     p = promise(['atom', 'error', 'end'])

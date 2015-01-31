@@ -1,7 +1,10 @@
 _       = require('lodash')
 promise = require('../promise')
 
-evaluator = () ->
+evaluator = (args...) ->
+  _.reduce(_.rest(args...), (acc, arg) ->
+    acc + arg
+  , _.first(args...))
 
 module.exports = (rules, strm) ->
   do (rules, strm) ->
@@ -12,8 +15,6 @@ module.exports = (rules, strm) ->
 
     strm.onAtom((atom) ->
       if atom.t == 'sy' and atom.ch == 'add'
-        atom.eval = evaluator
-        console.log atom
-      p.atom(atom)
-    )
+        atom = _.assign(atom, eval:evaluator)
+      p.atom(atom))
     p
