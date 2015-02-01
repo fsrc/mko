@@ -24,7 +24,7 @@ rules =
 module.exports = (stream) ->
   reader(stream)
     .onAtom((form) ->
-      console.log("Evaluated:", evaluate(form)))
+      console.log("Evaluated:", form.eval(form)))
     .onError((code, args...) ->
       console.log("reader error:", errors(code, args...))
       process.exit(code))
