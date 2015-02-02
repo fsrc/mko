@@ -2,7 +2,6 @@ _ = require("lodash")
 rules = require("./rules")
 primitives = require("./primitives")(rules)
 
-
 char      = require("./class/char")
 string    = require("./class/string")
 comment   = require("./class/comment")
