@@ -6,7 +6,8 @@ errors = require('./errors')
 module.exports = (stream) ->
   reader(stream)
     .onAtom((form) ->
-      console.log("Evaluated:", form.eval(form)))
+      console.log "Form", form)
+      #console.log("Evaluated:", form.eval(form)))
     .onError((code, args...) ->
       console.log("Reader error:", errors(code, args...))
       process.exit(code))
