@@ -14,39 +14,31 @@ module.exports = (rules, chars) ->
     newstate = (char) ->
       match = _.find(classes, (match) -> match.test(char.str))
       if match?
-        symbol : false
+        class : "delimiter"
         match  : match
         atom   : [char]
       else
-        symbol : true
+        class : "symbol"
         atom   : [char]
 
+    newatom = (state, type) ->
+      row:state.atom[0].row
+      col:state.atom[0].col
+      str:_.pluck(state.atom, 'str').join('')
+      type:_.findKey(rules.classes, (match) -> match == state.match) or "symbol"
+
     chars.onChar((char) ->
-      if state? and not state.symbol
+      if state?
         str = _.pluck(state.atom, 'str').join('') + char.str
-        if state.match.test(str)
+        if state.match?.test(str)
           state.atom.push(char)
         else
-          p.atom(
-            row:state.atom[0].row
-            col:state.atom[0].col
-            str:_.pluck(state.atom, 'str').join('')
-            type:_.findKey(rules.classes, (match) -> match == state.match))
-
-          state = newstate(char)
-      else if state? and state.symbol
-        pendingstate = newstate(char)
-
-        if pendingstate.symbol
-          state.atom.push(char)
-        else
-          p.atom(
-            row:state.atom[0].row
-            col:state.atom[0].col
-            str:_.pluck(state.atom, 'str').join('')
-            type:'symbol')
-
-          state = pendingstate
+          pendingstate = newstate(char)
+          if pendingstate.class == state.class == "symbol"
+            state.atom.push(char)
+          else
+            p.atom(newatom(state))
+            state = pendingstate
 
       else
         state = newstate(char))

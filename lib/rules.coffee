@@ -14,9 +14,9 @@ module.exports =
     delimiter   : /^[\(\)]$/  # ()
     space       : /^[\s\t]+$/ # \s\t
     eof         : /^\0$/      # \0
-    string      : /^"([^"]*)"$/       # "
+    string      : /^"$/  # "
     esc         : /^\\\w$/    # \?
-    comment     : /^;;[^\n]*$/ # ;;
+    comment     : /^;$/ # ;;
 
   pairs :
     "(" : ")"
