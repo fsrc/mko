@@ -15,11 +15,9 @@ tree = (strm, rules) ->
     strm.onAtom((atom) ->
       current = _.last(state)
       if starters.contains(atom.str)
-        console.log 'start'
         atom.children = []
         state.push(atom)
       else if current? and rules.pairs[current.str] == atom.str
-        console.log 'end'
         state.pop()
         if state.length > 0
           parent = _.last(state)
@@ -27,9 +25,7 @@ tree = (strm, rules) ->
         else
           p.atom(current)
       else if current?
-        current.children.push(atom)
-        console.log "in the stack"
-    )
+        current.children.push(atom))
     p
 
 

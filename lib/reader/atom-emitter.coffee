@@ -2,14 +2,14 @@ _       = require('lodash')
 promise = require('../promise')
 test    = require('../helpers').test
 
-module.exports = (rules, chars) ->
+module.exports = (rules, strm) ->
   do (rules, strm) ->
     p       = promise(['atom', 'error', 'end'])
     classes = _.values(rules.classes)
     state   = null
 
-    chars.onError((error) -> p.error(error))
-    chars.onEnd(() -> p.end())
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
 
     newstate = (char) ->
       match = _.find(classes, (match) -> match.test(char.str))
@@ -27,7 +27,7 @@ module.exports = (rules, chars) ->
       str:_.pluck(state.atom, 'str').join('')
       type:_.findKey(rules.classes, (match) -> match == state.match) or "symbol"
 
-    chars.onChar((char) ->
+    strm.onChar((char) ->
       if state?
         str = _.pluck(state.atom, 'str').join('') + char.str
         if state.match?.test(str)

@@ -1,14 +1,14 @@
 _       = require('lodash')
 promise = require('../promise')
 
-module.exports = (chars, types...) ->
-  do (strm) ->
+module.exports = (strm, types...) ->
+  do (strm, types) ->
     p       = promise(['atom', 'error', 'end'])
     state   = null
     types   = _(types)
 
-    chars.onError((error) -> p.error(error))
-    chars.onEnd(() -> p.end())
+    strm.onError((error) -> p.error(error))
+    strm.onEnd(() -> p.end())
 
     newatom = (state) ->
       row:state.atom[0].row
@@ -16,7 +16,7 @@ module.exports = (chars, types...) ->
       str:_.pluck(state.atom, 'str').join('')
       type:state.atom[0].type
 
-    chars.onAtom((char) ->
+    strm.onAtom((char) ->
       if not types.contains(char.type)
         p.atom(char)
     )

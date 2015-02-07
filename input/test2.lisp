@@ -1,4 +1,2 @@
-(add (mul (add 2 (sub 5 3)) 2)
-     (sub 8 2 "testar ")
-     (div 5 2 2)
-     (mul 5 2 2))
+(mac eight () (add 3 5))
+(add 3 5)

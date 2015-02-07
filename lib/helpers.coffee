@@ -8,3 +8,6 @@ exports.endsWith = (str, suffix) ->
 exports.test = (type, atom) ->
   type.test(atom.str)
 
+exports.iftest = (type, atom, fn) ->
+  if type.test(atom.str)
+    fn()

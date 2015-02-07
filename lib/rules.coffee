@@ -16,3 +16,9 @@ module.exports =
   types :
     "(" : "list"
 
+  forms :
+    list   : /^[\(\)]$/  # ()
+    number : /^\d+\.\d+$/
+    int    : /^\d+$/
+    string : /^"/
+
