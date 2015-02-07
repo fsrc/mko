@@ -13,8 +13,8 @@ printCode = (form) ->
 module.exports = (stream) ->
   reader(stream)
     .onAtom((form) ->
-      console.log "Form pre macro expansion"
-      console.log printCode(form)
+      #console.log "Form pre macro expansion"
+      #console.log printCode(form)
       console.log "Form post macro expansion"
       console.log printCode(maceval(form)))
     .onError((code, args...) ->
