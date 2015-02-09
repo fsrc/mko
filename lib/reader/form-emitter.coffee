@@ -14,5 +14,5 @@ module.exports = (rules, strm) ->
       if _.compact(_.map(formtypes, (type) ->
         iftest(rules.forms[type], atom, () ->
           p.atom(_.assign({ form:type }, atom))))).length == 0
-        p.atom(atom))
+        p.atom(_.assign({form:'symbol'}, atom)))
     p
