@@ -21,8 +21,10 @@ evaluate = do () ->
     number : require('./forms/form-number')
     string : require('./forms/form-string')
     symbol : require('./forms/form-symbol')
+    block  : require('./forms/form-block')
 
   (form, scope) ->
-    forms[form.form](form, evaluate, defines, macros, scope)
+    subscope = _.cloneDeep(scope)
+    forms[form.form](form, evaluate, defines, macros, subscope)
 
 module.exports = evaluate

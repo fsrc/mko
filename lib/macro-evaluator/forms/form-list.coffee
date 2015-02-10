@@ -7,14 +7,19 @@ module.exports = (form, evaluator, defines, macros, scope) ->
     .map((form) -> evaluator(form, scope))
     .value()
 
+
   if symbol? and _.has(defines, symbol.str)
     def = defines[symbol.str]
     return def(args...) if def?
+
   else if symbol? and _.has(macros, symbol.str)
     mac = macros[symbol.str]
-    return mac(args...) if mac?
+    result = mac(args...) if mac?
+    return result
+
   else if symbol? and _.has(scope.mac, symbol.str)
     mac = scope.mac[symbol.str]
-    return mac(args...) if mac?
+    return mac.call(args..., evaluator, defines, macros, scope) if mac?
+
   form
 

@@ -21,14 +21,16 @@ module.exports = (stream) ->
       .onAtom((form) ->
         expanded = maceval(form, scope)
         if expanded.form == 'macro'
-          scope.mac[form.name] = expanded
+          console.log "Registered macro #{expanded.name}"
+          scope.mac[expanded.name] = expanded
 
-        if expanded?
+        else if expanded?
           console.log "Form post macro expansion"
           console.log printCode(expanded))
 
       .onError((code, args...) ->
         console.log("Reader error:", errors(code, args...))
         process.exit(code))
+
       .onEnd(() -> console.log("Done"))
 
