@@ -1,20 +1,8 @@
 _      = require('lodash')
 
 evaluate = do () ->
-  macros =
-    use : require('./built-in/mac-use')
-    add : require('./built-in/mac-add')
-    sub : require('./built-in/mac-sub')
-    mul : require('./built-in/mac-mul')
-    div : require('./built-in/mac-div')
-
-  defines =
-    mac : require('./built-in/mac-mac')
-    # quote
-    # def
-    # int
-    # num
-
+  macros = require('./built-in')
+  defines = require('./defines')
   forms =
     list   : require('./forms/form-list')
     int    : require('./forms/form-int')
@@ -28,3 +16,4 @@ evaluate = do () ->
     forms[form.form](form, evaluate, defines, macros, subscope)
 
 module.exports = evaluate
+
