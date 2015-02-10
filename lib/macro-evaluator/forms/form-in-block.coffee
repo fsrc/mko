@@ -12,5 +12,5 @@ module.exports = (evaluator, macros, scope) ->
         subscope.mac[last_result.name] = last_result
 
       else if last_result?
-        console.log "In block, Form post macro expansion"
+        console.log "In block, Form post macro expansion", last_result
         last_result
