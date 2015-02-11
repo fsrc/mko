@@ -5,7 +5,9 @@ module.exports = (evaluator, macros, scope) ->
     subscope = _.cloneDeep(scope)
 
     (last_result, form) ->
+      console.log "In form-in-block form", form
       last_result = evaluator(form, subscope)
+      console.log "In form-in-block result", last_result
 
       if last_result.form == 'macro'
         console.log "In block, Registered macro #{last_result.name}"
