@@ -3,6 +3,7 @@ reader  = require('./reader')
 errors  = require('./errors')
 macro_evaluator = require('./macro-evaluator')
 macros = require("./macros")
+symbols = require("./symbols")
 
 printCode = (form) ->
   children = _.map(form.children, (f) -> printCode(f)).join(' ') if form.children?
@@ -16,7 +17,7 @@ module.exports = (stream) ->
   do (stream) ->
     scope =
       mac         : macros
-      symbols     : {}
+      symbols     : symbols
       evaluator   : macro_evaluator
       last_result : null
 

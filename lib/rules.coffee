@@ -18,7 +18,8 @@ module.exports =
 
   forms :
     list   : /^[\(\)]$/  # ()
-    number : /^\d+\.\d+$/
+    num    : /^\d+\.\d+$/
     int    : /^\d+$/
+    bool   : /^(true|false)$/
     string : /^"/
 

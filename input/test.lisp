@@ -1,2 +1,11 @@
-; Comment
-(sub 8 2 "testar ")
+(int a 5)
+(str b "tjoho")
+(bool c true)
+(num d 0.4)
+(list a b c d)
+(array 1 2 3 4)
+(object a 1 b 2 c 3 d 4)
+(quote (a) (b) (c) (d))
+(fun e (a b)
+     (4))
+

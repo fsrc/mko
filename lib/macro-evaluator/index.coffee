@@ -14,15 +14,39 @@ forms.list = (scope, form) ->
     console.log "Calling macro", name
     macro(scope, form)
 
+forms.string = (scope, form) ->
+  scope.last_result = form.str
+  scope
+
 forms.int = (scope, form) ->
   scope.last_result = parseInt(form.str)
   scope
 
+forms.num = (scope, form) ->
+  scope.last_result = parseFloat(form.str)
+  scope
+
+forms.bool = (scope, form) ->
+  scope.last_result = form.value
+  scope
+
 forms.symbol = (scope, form) ->
   derived_form = scope.symbols[form.str]
-  console.log derived_form
+
+  if not derived_form?
+    console.log "Symbol '#{form.str}' does not exist"
+    process.exit(255)
+
+  if not _.has(forms, derived_form.form)
+    console.log "Symbol #{derived_form.form} can't be used"
+    process.exit(255)
   forms[derived_form.form](scope, derived_form)
 
 module.exports = (scope, form) ->
   console.log "Evaluating form", form.form
+  console.log form
+  if not _.has(forms, form.form)
+    console.log "Could not evaluate form", form.form
+    console.log form
+    process.exit(255)
   forms[form.form](_.cloneDeep(scope), form)
