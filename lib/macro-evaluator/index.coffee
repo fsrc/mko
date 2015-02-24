@@ -18,6 +18,11 @@ forms.int = (scope, form) ->
   scope.last_result = parseInt(form.str)
   scope
 
+forms.symbol = (scope, form) ->
+  derived_form = scope.symbols[form.str]
+  console.log derived_form
+  forms[derived_form.form](scope, derived_form)
+
 module.exports = (scope, form) ->
   console.log "Evaluating form", form.form
   forms[form.form](_.cloneDeep(scope), form)

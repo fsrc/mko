@@ -2,16 +2,22 @@ _ = require('lodash')
 
 eval_macro = (arity, block, scope, form) ->
   console.log "Trying to execute macro"
-  console.log "Form", form
-  args = _.rest(form.children)
+
+  childscope = _.cloneDeep(scope)
+  args       = _.rest(form.children)
+
+  params = _.zipObject(_.map(arity.children, (child) -> child.str), args)
+
+  childscope.symbols = _.assign(params, childscope.symbols)
+
   _.reduce(block, (subscope, subform) ->
       subscope.evaluator(subscope, subform)
-    , scope)
+    , childscope)
 
 
 validate_symbol = (scope, name) -> name
-validate_arity = (scope, arity) -> arity
-validate_block = (scope, block) -> block
+validate_arity  = (scope, arity) -> arity
+validate_block  = (scope, block) -> block
 validate_number = (scope, number) -> number
 
 sum = (scope, form, fn) ->

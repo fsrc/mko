@@ -15,9 +15,10 @@ printCode = (form) ->
 module.exports = (stream) ->
   do (stream) ->
     scope =
-      mac:macros
-      evaluator:macro_evaluator
-      last_result:null
+      mac         : macros
+      symbols     : {}
+      evaluator   : macro_evaluator
+      last_result : null
 
     reader(stream)
       .onAtom((form) ->
