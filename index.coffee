@@ -8,4 +8,5 @@ strm = fs.createReadStream(fname, {
   encoding:'utf8',
   autoClose:true})
 
+
 compile(strm)

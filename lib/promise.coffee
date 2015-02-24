@@ -10,4 +10,3 @@ module.exports = (events) ->
       acc
     acc
   , { events: events })
-
